@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>k8s on Jane - A super concise theme for Hugo</title>
-    <link>http://localhost:1313/categories/k8s/</link>
-    <description>Recent content in k8s on Jane - A super concise theme for Hugo</description>
+    <title>k8s on lt90s&#39;s Blog</title>
+    <link>https://lt90s.github.io/categories/k8s/</link>
+    <description>Recent content in k8s on lt90s&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
     <lastBuildDate>Fri, 07 Jun 2019 17:57:29 +0700</lastBuildDate>
     
-	<atom:link href="http://localhost:1313/categories/k8s/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://lt90s.github.io/categories/k8s/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>k8s deepcopy_gen 使用</title>
-      <link>http://localhost:1313/post/deepcopy_gen/</link>
+      <link>https://lt90s.github.io/post/deepcopy_gen/</link>
       <pubDate>Fri, 07 Jun 2019 17:57:29 +0700</pubDate>
       
-      <guid>http://localhost:1313/post/deepcopy_gen/</guid>
+      <guid>https://lt90s.github.io/post/deepcopy_gen/</guid>
       <description>简介 k8s大量使用了代码生成工具，但无奈文档很少，不太容易获得直观的认识，在此先记录总结一下deepcopy_gen工具的用途和使用方法。 deepcopy_gen</description>
     </item>
     
