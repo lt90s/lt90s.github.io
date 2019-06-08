@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Jane - A super concise theme for Hugo</title>
+    <link>http://localhost:1313/</link>
+    <description>Recent content on Jane - A super concise theme for Hugo</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Fri, 07 Jun 2019 17:57:29 +0700</lastBuildDate>
+    
+        <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>k8s deepcopy_gen 使用</title>
+      <link>http://localhost:1313/post/deepcopy_gen/</link>
+      <pubDate>Fri, 07 Jun 2019 17:57:29 +0700</pubDate>
+      
+      <guid>http://localhost:1313/post/deepcopy_gen/</guid>
+      
+        <description>
+
+&lt;h3 id=&#34;简介&#34;&gt;简介&lt;/h3&gt;
+
+&lt;p&gt;&lt;code&gt;k8s&lt;/code&gt;大量使用了代码生成工具，但无奈文档很少，不太容易获得直观的认识，在此先记录总结一下&lt;code&gt;deepcopy_gen&lt;/code&gt;工具的用途和使用方法。&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;deepcopy_gen&lt;/code&gt; 这个工具从名字上来看就大概可以猜到它是用于生成深拷贝的代码。比如代码中定义了一个类型&lt;code&gt;Foo&lt;/code&gt;，那么使用这个工具就可以生成此类型的深拷贝方法。如果有大量自定义的类型，而且在使用过程中需要进行深拷贝，这个工具可以让我们可以非常多的代码。堪称神器。&lt;/p&gt;
+
+&lt;h3 id=&#34;实验&#34;&gt;实验&lt;/h3&gt;
+
+&lt;p&gt;通过实际的代码能更加直观的了解这个工具&lt;/p&gt;
+
+&lt;h4 id=&#34;安装-deepcopy-gen&#34;&gt;安装&lt;code&gt;deepcopy_gen&lt;/code&gt;&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;git clone https://github.com/kubernetes/code-generator --depth&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;
+&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; code-generator
+go build -o deepcopy-gen cmd/deepcopy-gen/main.go
+mv deepcopy-gen /usr/local/bin&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;h4 id=&#34;下载demo代码&#34;&gt;下载demo代码&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;git clone https://github.com/lt90s/deepcopy-gen-demo
+&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; deepcopy-gen-demo&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;目录结构：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;├── README.md
+├── boilerplate.txt
+├── deepcopy-gen
+├── go.mod
+└── types
+    ├── doc.go
+    ├── generated_deepcopy.go
+    └── types.go&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;h4 id=&#34;生成代码&#34;&gt;生成代码&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;deepcopy-gen -v &lt;span class=&#34;m&#34;&gt;2&lt;/span&gt; -h boilerplate.txt --bounding-dirs . -i github.com/lt90s/deepcopy-gen-demo/types -O generated_deepcopy
+mv github.com/lt90s/deepcopy-gen-demo/types/generated_deepcopy.go types/
+rm -rf github.com&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;执行此命令后会在当前目录生成&lt;code&gt;github.com/lt90s/deepcopy-gen-demo/types/generated_deepcopy.go&lt;/code&gt;的文件，该文件便是生成的深拷贝方法的代码文件，将此文件移入&lt;code&gt;types&lt;/code&gt;目录下便可。&lt;/p&gt;
+
+&lt;h3 id=&#34;分析&#34;&gt;分析&lt;/h3&gt;
+
+&lt;h4 id=&#34;命令行分析&#34;&gt;命令行分析&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;deepcopy-gen -v &lt;span class=&#34;m&#34;&gt;2&lt;/span&gt; -h boilerplate.txt --bounding-dirs . -i github.com/lt90s/deepcopy-gen-demo/types -O generated_deepcopy&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;-v 2&lt;/code&gt; 指定输出内容的详细程度&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-h boilerplate.txt&lt;/code&gt;指定所有生成的文件的头部声明内容&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;--bounding-dirs .&lt;/code&gt;指定生成目录为当前路径】&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-i github.com/lt90s/deepcopy-gen-demo/types&lt;/code&gt;指定此&lt;code&gt;package&lt;/code&gt;需要进行代码生成&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-O generated_deepcopy&lt;/code&gt;指定生成的文件名称为&lt;code&gt;generated_deepcopy.go&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&#34;生成内容分析&#34;&gt;生成内容分析：&lt;/h4&gt;
+
+&lt;p&gt;打开&lt;code&gt;types/generated_deepcopy.go&lt;/code&gt;文件可以看到。&lt;code&gt;FooType&lt;/code&gt;类型生成了三个拷贝方法&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;func (in *FooType) DeepCopyInto(out *FooType)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;func (in *FooType) DeepCopy() *FooType&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;func (in *FooType) DeepCopyBarInterface() BarInterface&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;但是&lt;code&gt;BazType&lt;/code&gt;却没有生成深拷贝方法，为啥呢？下面会进行分析。&lt;/p&gt;
+
+&lt;h4 id=&#34;生成规则分析&#34;&gt;生成规则分析&lt;/h4&gt;
+
+&lt;p&gt;通过命令行参数&lt;code&gt;-i&lt;/code&gt;指定需要生成代码的&lt;code&gt;package&lt;/code&gt;后，工具会对属于此包的文件进行处理（注意并不包括此包目录下的子目录，比如types/sub下的文件就不会处理，因为它是&lt;code&gt;github.com/lt90s/deepcopy-gen-demo/types/sub&lt;/code&gt;）。有几种方式可以控制是否生成深拷贝代码&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;全局开关： 在文件中加入一行注释&lt;code&gt;// +k8s:deepcopy-gen=package&lt;/code&gt;，通常在&lt;code&gt;doc.go&lt;/code&gt;文件中表明需要检查该&lt;code&gt;package&lt;/code&gt;下的所有自定义类型，默认情况下生成深拷贝方法&lt;/li&gt;
+&lt;li&gt;具体开关：在类型声明上加入一行注释&lt;code&gt;// +k8s:deepcopy-gen=false&lt;/code&gt;或者&lt;code&gt;// +k8s:deepcopy-gen=true&lt;/code&gt;，前者表示此类型不需要生成深拷贝方法，后者表示需要生成。当全局开关打开时，只需要在不需要深拷贝方法的类型声明前加入&lt;code&gt;// +k8s:deepcopy-gen=false&lt;/code&gt;即可，这就是为什么&lt;code&gt;BazType&lt;/code&gt;没有生成相应的深拷贝方法。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;在&lt;code&gt;types/types.go&lt;/code&gt;文件中，&lt;code&gt;go&lt;/code&gt;语言中的基本数据类型都是支持拷贝的，但是&lt;code&gt;channel&lt;/code&gt;和&lt;code&gt;function&lt;/code&gt;不支持，可以试一下将注释取消，然后再执行&lt;code&gt;deepcopy-gen&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;interface&lt;/code&gt;比较特殊，要让其支持深拷贝，必须在接口中声明&lt;code&gt;DeepCopyInterfaceName() InterfaceName&lt;/code&gt;方法，其中&lt;code&gt;InterfaceName&lt;/code&gt;是接口类型的名称。例如:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span class=&#34;kd&#34;&gt;type&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;BarInterface&lt;/span&gt; &lt;span class=&#34;kd&#34;&gt;interface&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+	&lt;span class=&#34;nf&#34;&gt;DeepCopyBarInterface&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;BarInterface&lt;/span&gt;
+	&lt;span class=&#34;nf&#34;&gt;String&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;string&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;那么问题来了。如果有很多实现了这个接口类型，它们都需要深拷贝方法，那这个&lt;code&gt;DeepCopyInterfaceName&lt;/code&gt;方法怎么生成？&lt;code&gt;deepcopy-gen&lt;/code&gt;提供了&lt;code&gt;// +k8s:deepcopy-gen:interfaces=github.com/foo/bar/pkg.InterfaceName&lt;/code&gt;这个指令，将其放在实现了&lt;code&gt;InterfaceName&lt;/code&gt;接口的类型上面，工具就会自动生成&lt;code&gt;DeepCopyInterfaceName&lt;/code&gt;的方法。例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// +k8s:deepcopy-gen:interfaces=github.com/lt90s/deepcopy-gen-demo/types.BarInterface
+&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;type&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;FooType&lt;/span&gt; &lt;span class=&#34;kd&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+	&lt;span class=&#34;nx&#34;&gt;a&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt;
+  &lt;span class=&#34;o&#34;&gt;...&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;如果实现了多个接口。那么以&lt;code&gt;,&lt;/code&gt;分隔各个接口。&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;demo&lt;/code&gt;中没有演示一个指令&lt;code&gt;// +k8s:deepcopy-gen:nonpointer-interfaces=true&lt;/code&gt;。可以看到。默认情况下，生成的&lt;code&gt;DeepCopyInterfaceName&lt;/code&gt;方法的接受者是指针类型的。当你不想要指针类型的接收者时，就可以使用此指令来达到目的。&lt;/p&gt;
+
+&lt;h3 id=&#34;总结&#34;&gt;总结&lt;/h3&gt;
+
+&lt;p&gt;当自定义类型需要进行深拷贝时候，可以使用此工具来生成深拷贝方法。可以节省大量的重复代码，解放生产力。&lt;/p&gt;
+</description>
+      
+    </item>
+    
+  </channel>
+</rss>
